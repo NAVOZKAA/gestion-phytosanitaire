@@ -6,13 +6,18 @@ import './App.css'
 import Dashboard from './pages/Dashboard'
 import Cultures from './pages/Cultures'
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
+import Sidebar from './components/Sidebar'
+import MainLayout from './layouts/MainLayout'
+
 function App() {
   return (
    <BrowserRouter>
-    <Routes>
-      <Route path='/' element={<Dashboard/>}/>
-      <Route path='/cultures' element={<Cultures/>}/>
-    </Routes>
+      <Routes >
+        <Route element={<MainLayout/>}>
+        <Route path='/' index element={<Dashboard/>}/>
+        <Route path='/cultures' element={<Cultures/>}/>
+      </Route>
+      </Routes>
    </BrowserRouter>
   )
 }
