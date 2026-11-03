@@ -1,0 +1,15 @@
+{
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  "editor.quickSuggestionsDelay": 150,
+  "editor.suggest.insertMode": "insert",
+  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.tabCompletion": "off",
+  "editor.suggestSelection": "first",
+  "editor.wordBasedSuggestions": "matchingDocuments",
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true
+}

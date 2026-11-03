@@ -1,0 +1,145 @@
+/* =========================================
+   Gestion des Maladies - Phytosanitaire Theme
+   ========================================= */
+
+.maladies-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Page Header */
+.maladies-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 8px;
+}
+
+.maladies-title {
+    color: #172B35;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+}
+
+.maladies-subtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Table Card */
+.maladies-card {
+    background-color: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    border-left: 5px solid #dc3545; /* Matches Dashboard card accent */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #ffffff;
+}
+
+.card-header h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #172B35;
+    margin-bottom: 4px;
+}
+
+.card-caption {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Responsive Table */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.maladies-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.maladies-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 14px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.maladies-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.maladies-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.maladies-table tbody tr:hover {
+    background-color: #fff9f9;
+}
+
+.maladies-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Cell Specific Styles */
+.cell-maladie-nom {
+    font-weight: 600;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.maladie-indicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.cell-description {
+    color: #475569;
+    line-height: 1.5;
+}
+
+/* Symptômes Badge */
+.badge-symptome {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fee2e2;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
