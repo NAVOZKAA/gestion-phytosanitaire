@@ -1,7 +1,7 @@
 import { useState } from "react";
 function Cultures() {
 
-
+  const [editingId, setEditingId] = useState(null);
   const [cultures, setCultures] = useState([
     {
       id: 1,
@@ -17,8 +17,9 @@ function Cultures() {
     }
   ]);
   function handleSubmit(e) {
+    
     e.preventDefault();
-    if (nom === "" | type === "" | superficie === "") {
+    if (nom === "" || type === "" || superficie === "") {
       alert(" veuillez remplir tous les champs");
       return;
     }
@@ -26,14 +27,36 @@ function Cultures() {
       alert("La superficie doit être supérieure à zéro");
       return;
     }
-    const nouvelleCulture = {
-      id: Date.now(),
-      nom: nom,
-      type: type,
-      superficie: Number(superficie)
+    if (editingId === null) {
+      //   add  culture
+      const nouvelleCulture = {
+        id: Date.now(),
+        nom: nom,
+        type: type,
+        superficie: Number(superficie)
     };
 
     setCultures([...cultures, nouvelleCulture]);
+
+    } else {
+      //  modify   culture
+       const updatedCultures = cultures.map((culture) => {
+        if (culture.id === editingId) {
+            return {
+                ...culture,
+                nom: nom,
+                type: type,
+                superficie: Number(superficie)
+            };
+        }
+
+        return culture;
+    });
+
+    setCultures(updatedCultures);
+}
+
+setEditingId(null);
 
     setNom("");
     setType("");
@@ -44,11 +67,28 @@ function Cultures() {
   const [type, setType] = useState("");
   const [superficie, setSuperficie] = useState("");
   // supprimer culture
-function handledelete(id){
-  setCultures(
-    cultures.filter((culture)=>culture.id!==id))
-  
+  function handledelete(id) {
+    setCultures(
+      cultures.filter((culture) => culture.id !== id))
+
+  }
+
+    function handleEdit(id) {
+      const culture = cultures.find((culture) => culture.id === id);
+
+      setNom(culture.nom);
+      setType(culture.type);
+      setSuperficie(String(culture.superficie));
+
+      setEditingId(id);
+    }
+function handleCancelEdit() {
+  setEditingId(null);
+  setNom("");
+  setType("");
+  setSuperficie("");
 }
+  
   return (
     <div>
       <h1>Gestion des cultures</h1>
@@ -70,8 +110,13 @@ function handledelete(id){
               <td>{culture.type}</td>
               <td>{culture.superficie} ha</td>
               <td>
-                <button onClick={()=>handledelete(culture.id)}>
+                <button onClick={() => handledelete(culture.id)}>
                   supprimer
+                </button>
+              </td>
+              <td>
+                <button onClick={() => handleEdit(culture.id)}>
+                  modifier
                 </button>
               </td>
             </tr>
@@ -101,8 +146,16 @@ function handledelete(id){
         />
 
 
-        <button type="submit">Ajouter</button>
-      </form>
+<button type="submit">
+    {editingId === null ? "Ajouter" : "Modifier"}
+</button>    
+{
+  editingId !== null && (
+  <button type="button" onClick={handleCancelEdit}>
+    Annuler
+  </button>
+)}
+</form>
     </div>
   );
 }
