@@ -1,11 +1,17 @@
-import {Link } from "react-router-dom"
+import { Link, NavLink } from "react-router-dom"
+import "../layouts/MainLayout.css"
+function Sidebar() {
+    return (
+        <aside className="sidebar">
+            <nav>
+                <NavLink to="/" end>Dashboard</NavLink>
+                <NavLink to="/cultures">Cultures</NavLink>
+                <NavLink to="/maladies">Maladies</NavLink>
+                <NavLink to="/traitements">Traitements</NavLink>
+                <NavLink to="/historique">Historique</NavLink>
+                <NavLink to="/alertes">Alertes</NavLink>
 
-function Sidebar(){
-    return( 
-        <nav>
-            <Link to="/">Dashboard</Link>  
-            <Link to="/cultures">Cultures</Link>
-        </nav>
+            </nav></aside>
     )
 }
 export default Sidebar;

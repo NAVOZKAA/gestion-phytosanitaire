@@ -1,7 +1,10 @@
 import {Link} from 'react-router-dom'
-function Test(){
+import "../layouts/MainLayout.css"
+function Header(){
     return (
-        <h1>Gestion phytosanitaire</h1>
+        <div className='Header'>
+        <h1>Gestion phytosanitaire</h1></div>
     )
+
 }
-export default Test;
+export default Header;
