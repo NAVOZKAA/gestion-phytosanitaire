@@ -1,0 +1,70 @@
+
+.dashboard {
+    width: 100%;
+}
+
+.dashboard-heading {
+    margin-bottom: 30px;
+}
+
+.dashboard-heading h2 {
+    color: #172B35;
+    font-size: 26px;
+    margin-bottom: 8px;
+}
+
+.dashboard-heading p {
+    color: #64748b;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.dashboard-card {
+    background-color: white;
+    padding: 24px;
+    border-radius: 12px;
+    border-left: 5px solid;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-card h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.card-number {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.dashboard-card span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.cultures {
+    border-color: #1769E0;
+}
+
+.maladies {
+    border-color: #dc3545;
+}
+
+.traitements {
+    border-color: #2e8b57;
+}
+
+.alertes {
+    border-color: #f0a020;
+}
+
+@media (max-width: 700px) {
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+}
