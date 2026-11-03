@@ -1,6 +1,7 @@
 import { useState } from "react";
-function Cultures() {
+import "./Cultures.css";
 
+function Cultures() {
   const [editingId, setEditingId] = useState(null);
   const [cultures, setCultures] = useState([
     {
@@ -16,8 +17,8 @@ function Cultures() {
       superficie: 5
     }
   ]);
+
   function handleSubmit(e) {
-    
     e.preventDefault();
     if (nom === "" || type === "" || superficie === "") {
       alert(" veuillez remplir tous les champs");
@@ -34,128 +35,202 @@ function Cultures() {
         nom: nom,
         type: type,
         superficie: Number(superficie)
-    };
+      };
 
-    setCultures([...cultures, nouvelleCulture]);
-
+      setCultures([...cultures, nouvelleCulture]);
     } else {
       //  modify   culture
-       const updatedCultures = cultures.map((culture) => {
+      const updatedCultures = cultures.map((culture) => {
         if (culture.id === editingId) {
-            return {
-                ...culture,
-                nom: nom,
-                type: type,
-                superficie: Number(superficie)
-            };
+          return {
+            ...culture,
+            nom: nom,
+            type: type,
+            superficie: Number(superficie)
+          };
         }
 
         return culture;
-    });
+      });
 
-    setCultures(updatedCultures);
-}
+      setCultures(updatedCultures);
+    }
 
-setEditingId(null);
-
+    setEditingId(null);
     setNom("");
     setType("");
     setSuperficie("");
   }
+
   // formulaire
   const [nom, setNom] = useState("");
   const [type, setType] = useState("");
   const [superficie, setSuperficie] = useState("");
+
   // supprimer culture
   function handledelete(id) {
-    setCultures(
-      cultures.filter((culture) => culture.id !== id))
+    setCultures(cultures.filter((culture) => culture.id !== id));
 
+    if (editingId === id) {
+      handleCancelEdit();
+    }
   }
 
-    function handleEdit(id) {
-      const culture = cultures.find((culture) => culture.id === id);
+  function handleEdit(id) {
+    const culture = cultures.find((culture) => culture.id === id);
 
-      setNom(culture.nom);
-      setType(culture.type);
-      setSuperficie(String(culture.superficie));
+    setNom(culture.nom);
+    setType(culture.type);
+    setSuperficie(String(culture.superficie));
 
-      setEditingId(id);
-    }
-function handleCancelEdit() {
-  setEditingId(null);
-  setNom("");
-  setType("");
-  setSuperficie("");
-}
-  
+    setEditingId(id);
+  }
+
+  function handleCancelEdit() {
+    setEditingId(null);
+    setNom("");
+    setType("");
+    setSuperficie("");
+  }
+
   return (
-    <div>
-      <h1>Gestion des cultures</h1>
+    <div className="cultures-page">
+      <div className="cultures-header">
+        <div>
+          <h1 className="cultures-title">Gestion des cultures</h1>
+          <p className="cultures-subtitle">Suivi des parcelles et cultures agricoles</p>
+        </div>
+      </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Culture</th>
-            <th>Type</th>
-            <th>Superficie</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      <div className="cultures-content">
+        <div className="cultures-table-card">
+          <div className="card-header">
+            <h2>Liste des cultures</h2>
+            <span className="card-caption">Aperçu et gestion de vos parcelles</span>
+          </div>
 
-        <tbody>
-          {cultures.map((culture) => (
-            <tr key={culture.id}>
-              <td>{culture.nom}</td>
-              <td>{culture.type}</td>
-              <td>{culture.superficie} ha</td>
-              <td>
-                <button onClick={() => handledelete(culture.id)}>
-                  supprimer
+          <div className="table-responsive">
+            <table className="cultures-table">
+              <thead>
+                <tr>
+                  <th>Culture</th>
+                  <th>Type</th>
+                  <th>Superficie</th>
+                  <th className="th-actions">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {cultures.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="empty-state">
+                      Aucune culture enregistrée pour le moment.
+                    </td>
+                  </tr>
+                ) : (
+                  cultures.map((culture) => (
+                    <tr
+                      key={culture.id}
+                      className={editingId === culture.id ? "row-editing" : ""}
+                    >
+                      <td className="cell-nom">
+                        <span className="crop-indicator"></span>
+                        {culture.nom}
+                      </td>
+                      <td>
+                        <span className="badge-type">{culture.type}</span>
+                      </td>
+                      <td className="cell-superficie">
+                        <strong>{culture.superficie}</strong>{" "}
+                        <span className="unit">ha</span>
+                      </td>
+                      <td className="cell-actions">
+                        <button
+                          type="button"
+                          className="btn-action btn-edit"
+                          onClick={() => handleEdit(culture.id)}
+                        >
+                          modifier
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-action btn-delete"
+                          onClick={() => handledelete(culture.id)}
+                        >
+                          supprimer
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="cultures-form-card">
+          <div className="card-header">
+            <h2>
+              {editingId === null ? "Ajouter une culture" : "Modifier la culture"}
+            </h2>
+            <span className="card-caption">
+              {editingId === null
+                ? "Remplissez le formulaire ci-dessous"
+                : "Ajustez les informations de la culture"}
+            </span>
+          </div>
+
+          <form className="cultures-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="nom">Nom de la culture</label>
+              <input
+                id="nom"
+                type="text"
+                placeholder="Ex: Tomate, Olivier..."
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="type">Type de culture</label>
+              <input
+                id="type"
+                type="text"
+                placeholder="Ex: Légume, Arbre fruitier..."
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="superficie">Superficie (ha)</label>
+              <input
+                id="superficie"
+                type="number"
+                placeholder="Ex: 5"
+                value={superficie}
+                onChange={(e) => setSuperficie(e.target.value)}
+              />
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="btn-submit">
+                {editingId === null ? "Ajouter" : "Modifier"}
+              </button>
+              {editingId !== null && (
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={handleCancelEdit}
+                >
+                  Annuler
                 </button>
-              </td>
-              <td>
-                <button onClick={() => handleEdit(culture.id)}>
-                  modifier
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <form action="" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Nom de la culture"
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="Type de culture"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        />
-
-        <input
-          type="number"
-          placeholder="Superficie en hectares"
-          value={superficie}
-          onChange={(e) => setSuperficie(e.target.value)}
-        />
-
-
-<button type="submit">
-    {editingId === null ? "Ajouter" : "Modifier"}
-</button>    
-{
-  editingId !== null && (
-  <button type="button" onClick={handleCancelEdit}>
-    Annuler
-  </button>
-)}
-</form>
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
