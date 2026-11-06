@@ -16,7 +16,76 @@ function Maladies() {
       symptomes: "Poudre blanche sur les feuilles"
     }
   ]);
+const[nom,setNom]=useState("");
+const[description,setDescription]=useState("");
+const[symptomes,setSymptomes]=useState("");
+const[editingId,setEditingId]=useState(null);
+const[searchTerm,setSearchTerm]=useState("");
+const[submittedSearch,setSubmittedSearch]=useState("");
+function handleSubmit(e) {
+    e.preventDefault();
+    
+     if (!nom.trim() || !description.trim() || !symptomes.trim()) {
+      alert(" veuillez remplir tous les champs");
+      return;
+    }
+    if(editingId===null){
+    const newMaladie = {
+      id: Date.now(),
+      nom: nom,
+      description: description,
+      symptomes: symptomes
+    };
+    setMaladies([...maladies, newMaladie]);}
+    else{
+      const updatemaladie=maladies.map((maladie)=>{
+        if(maladie.id===editingId){
+          return{
+            ...maladie,
+            nom:nom,
+            description:description,
+            symptomes:symptomes
+          };
+        }
+        return maladie;
+      }) ;   
+      setMaladies(updatemaladie);
 
+    }
+    setEditingId(null);
+    setNom("");
+    setDescription("");
+    setSymptomes("");
+  }
+  function handleEdit(id){
+    const maladie=maladies.find((maladie)=>maladie.id===id)
+    setNom(maladie.nom);
+    setDescription(maladie.description);
+    setSymptomes(maladie.symptomes);
+    setEditingId(id);
+  }
+function handleCancelEdit() {
+    setEditingId(null);
+    setNom("");
+    setDescription("");
+    setSymptomes("");
+  }
+  function handleDelete(id) {
+    setMaladies(maladies.filter((maladie) => maladie.id !== id));
+    if (editingId === id) {
+      handleCancelEdit();
+    }
+  }
+  const filtredMaladie=maladies.filter((maladie)=>(
+maladie.nom.toLowerCase().includes(submittedSearch.toLowerCase())    )) 
+  function handlesearch(){
+    return ( setSubmittedSearch(searchTerm.trim()));
+
+    
+  }
+  
+  
+  
   return (
     <div className="maladies-page">
       <div className="maladies-header">
@@ -35,7 +104,16 @@ function Maladies() {
             Identification des symptômes et descriptions pathologiques
           </span>
         </div>
-
+      <div>
+        <input
+          type="text"
+          placeholder="Rechercher une maladie..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button onClick={handlesearch}>Rechercher</button>
+      </div>
+      
         <div className="table-responsive">
           <table className="maladies-table">
             <thead>
@@ -43,10 +121,11 @@ function Maladies() {
                 <th>Nom</th>
                 <th>Description</th>
                 <th>Symptômes</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {maladies.map((maladie) => (
+              {filtredMaladie.map((maladie) => (
                 <tr key={maladie.id}>
                   <td className="cell-maladie-nom">
                     <span className="maladie-indicator"></span>
@@ -56,10 +135,42 @@ function Maladies() {
                   <td>
                     <span className="badge-symptome">{maladie.symptomes}</span>
                   </td>
+                  <td>
+                    <button className="edit-button" onClick={() => handleEdit(maladie.id)}>
+                      Modifier
+                    </button>
+                    <button className="delete-button" onClick={() => handleDelete(maladie.id)}>
+                      Supprimer
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <form action="" onSubmit={handleSubmit}>
+            <div className="maladiesform">
+              <div className="form-groupe">
+                <label htmlFor="nom">Nom de la maladie</label>
+                <input  id="nom" type="text" value={nom}  onChange={(e)=>setNom(e.target.value)}  />
+              </div>
+              <div className="form-groupe">
+                <label htmlFor="description">Description de la maladie</label>
+                <input id="description" type="text" value={description}  onChange={(e)=>setDescription(e.target.value)}  />
+              </div>
+              <div className="form-groupe">
+                <label htmlFor="symptomes">Symptômes</label>
+                <input id="symptomes" type="text" value={symptomes}  onChange={(e)=>setSymptomes(e.target.value)}  />
+              </div>
+             </div>
+            <button type="submit">
+              {editingId===null? "Ajouter une maladie":"Modifier la maladie"}
+            </button>
+            {editingId!==null && (
+              <button type="button" onClick={handleCancelEdit}>
+                Annuler
+              </button>
+            )}
+          </form>
         </div>
       </div>
     </div>
