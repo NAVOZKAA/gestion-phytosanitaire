@@ -8,11 +8,13 @@ import Cultures from './pages/Cultures'
 import Maladies from './pages/Maladies'
 import Traitements from './pages/Traitements'
 import Applications from './pages/Applications'
+import Historiques from './pages/Historiques'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import MainLayout from './layouts/MainLayout'
-
+ 
 function App() {
+  const [applications, setApplications] = useState([]);
   return (
    <BrowserRouter>
       <Routes>
@@ -21,7 +23,8 @@ function App() {
           <Route path='/cultures' element={<Cultures />} />
           <Route path='/maladies' element={<Maladies />} />
           <Route path='/traitements' element={<Traitements />} />
-          <Route path='/applications' element={<Applications/>}/>
+          <Route path='/applications' element={<Applications applications={applications} setApplications={setApplications}/>}/>
+          <Route path='/historiques' element={<Historiques applications={applications}/>}/>
         </Route>
       </Routes>
    </BrowserRouter>
