@@ -25,9 +25,9 @@ const [traitementId, setTraitementId] = useState("");
 const [dateApplication, setDateApplication] = useState("");
 const [dateSuivi, setDateSuivi] = useState("");
 const [observations, setObservations] = useState("");
+const [editingId, setEditingId] = useState(null);
 function handleSubmit(e) {
     e.preventDefault();
-
     if (
         !cultureId ||
         !maladieId ||
@@ -43,6 +43,7 @@ function handleSubmit(e) {
         alert("La date de suivi doit être après la date d'application.");
         return;
     }
+if(editingId===null){
 
     const nouvelleApplication = {
         id: Date.now(),
@@ -63,6 +64,62 @@ function handleSubmit(e) {
     setDateApplication("");
     setDateSuivi("");
     setObservations("");
+}if (editingId === null) {
+    const nouvelleApplication = {
+        id: Date.now(),
+        cultureId,
+        maladieId,
+        traitementId,
+        dateApplication,
+        dateSuivi,
+        observations,
+        resultat: "À évaluer"
+    };
+
+    setApplications([...applications, nouvelleApplication]);
+} else {
+    const applicationsModifiees = applications.map((application) =>
+        application.id === editingId
+            ? {
+                ...application,
+                cultureId,
+                maladieId,
+                traitementId,
+                dateApplication,
+                dateSuivi,
+                observations
+            }
+            : application
+    );
+
+    setApplications(applicationsModifiees);
+}}
+function handleEdit(application) {
+    setEditingId(application.id);
+    setCultureId(String(application.cultureId));
+    setMaladieId(String(application.maladieId));
+    setTraitementId(String(application.traitementId));
+    setDateApplication(application.dateApplication);
+    setDateSuivi(application.dateSuivi);
+    setObservations(application.observations);
+}
+
+function handleCancelEdit() {
+    setEditingId(null);
+    setCultureId("");
+    setMaladieId("");
+    setTraitementId("");
+    setDateApplication("");
+    setDateSuivi("");
+    setObservations("");
+}
+
+function handleDelete(id) {
+    if (window.confirm("Voulez-vous vraiment supprimer cette application ?")) {
+        setApplications(
+            applications.filter((application) => application.id !== id)
+        );
+    }
 }
 return (
     <div className="applications-container">
@@ -128,7 +185,14 @@ return (
                 onChange={(e) => setObservations(e.target.value)}
             />
 
-            <button type="submit">Enregistrer l'application</button>
+            <button type="submit">{editingId===null?"Enregistrer l'application" : "Modifier l'application"}</button>
+            {editingId !== null && (
+    <button type="button" onClick={handleCancelEdit}>
+        Annuler
+    </button>
+            )}
+
+            
         </form>
         <h2>Historique des applications</h2>
 
@@ -142,6 +206,7 @@ return (
             <th>Date de suivi</th>
             <th>Observations</th>
             <th>Résultat</th>
+            <th>Actions</th>
         </tr>
     </thead>
 
@@ -161,6 +226,15 @@ return (
                 <td>{application.dateSuivi}</td>
                 <td>{application.observations || "-"}</td>
                 <td>{application.resultat}</td>
+                <td>
+    <button type="button" onClick={() => handleEdit(application)}>
+        Modifier
+    </button>
+
+    <button type="button" onClick={() => handleDelete(application.id)}>
+        Supprimer
+    </button>
+</td>
             </tr>
         ))}
     </tbody>
