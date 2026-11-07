@@ -10,6 +10,7 @@ function Sidebar() {
                 <NavLink to="/traitements">Traitements</NavLink>
                 <NavLink to="/historique">Historique</NavLink>
                 <NavLink to="/alertes">Alertes</NavLink>
+                <NavLink to="/applications">applications</NavLink>
 
             </nav></aside>
     )
