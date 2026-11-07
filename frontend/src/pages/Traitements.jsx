@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import "./Traitements.css";
 
@@ -103,83 +102,124 @@ function Traitements() {
   return (
     <div className="traitements-page">
       <div className="traitements-header">
-        <h1>Gestion des traitements</h1>
-        <p>Gestion des traitements phytosanitaires prédéfinis</p>
+        <div>
+          <h1 className="traitements-title">Gestion des traitements</h1>
+          <p className="traitements-subtitle">
+            Protocoles et posologies des traitements phytosanitaires
+          </p>
+        </div>
       </div>
 
-      <div className="traitements-card">
-        <div className="card-header">
-          <h2>Liste des traitements</h2>
-        </div>
+      <div className="traitements-content">
+        {/* Table Card */}
+        <div className="traitements-card">
+          <div className="card-header">
+            <h2>Liste des traitements</h2>
+            <span className="card-caption">
+              Aperçu des protocoles, produits phytosanitaires et dosages
+            </span>
+          </div>
 
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Rechercher un traitement..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button type="button" onClick={handleSearch}>
-            Rechercher
-          </button>
-        </div>
+          <div className="search-container">
+            <div className="traitements-search-bar">
+              <input
+                type="text"
+                placeholder="Rechercher un traitement par nom..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn-search"
+                onClick={handleSearch}
+              >
+                Rechercher
+              </button>
+            </div>
+          </div>
 
-        <div className="table-responsive">
-          <table className="traitements-table">
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>Produit</th>
-                <th>Dosage</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredTraitements.map((traitement) => (
-                <tr key={traitement.id}>
-                  <td>{traitement.nom}</td>
-                  <td>{traitement.description}</td>
-                  <td>{traitement.produit}</td>
-                  <td>{traitement.dosage}</td>
-                  <td>
-                    <button
-                      type="button"
-                      onClick={() => handleEdit(traitement.id)}
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(traitement.id)}
-                    >
-                      Supprimer
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {filteredTraitements.length === 0 && (
+          <div className="table-responsive">
+            <table className="traitements-table">
+              <thead>
                 <tr>
-                  <td colSpan="5">Aucun traitement trouvé.</td>
+                  <th>Nom</th>
+                  <th>Description</th>
+                  <th>Produit</th>
+                  <th>Dosage</th>
+                  <th className="th-actions">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {filteredTraitements.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="empty-state">
+                      Aucun traitement trouvé.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTraitements.map((traitement) => (
+                    <tr
+                      key={traitement.id}
+                      className={editingId === traitement.id ? "row-editing" : ""}
+                    >
+                      <td className="cell-traitement-nom">
+                        <span className="traitement-indicator"></span>
+                        {traitement.nom}
+                      </td>
+                      <td className="cell-description">{traitement.description}</td>
+                      <td>
+                        <span className="badge-produit">{traitement.produit}</span>
+                      </td>
+                      <td>
+                        <span className="badge-dosage">{traitement.dosage}</span>
+                      </td>
+                      <td className="cell-actions">
+                        <button
+                          type="button"
+                          className="edit-button"
+                          onClick={() => handleEdit(traitement.id)}
+                        >
+                          Modifier
+                        </button>
+                        <button
+                          type="button"
+                          className="delete-button"
+                          onClick={() => handleDelete(traitement.id)}
+                        >
+                          Supprimer
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <h2>
-            {editingId === null ? "Ajouter un traitement" : "Modifier le traitement"}
-          </h2>
+        {/* Form Card */}
+        <div className="traitements-form-card">
+          <div className="card-header">
+            <h2>
+              {editingId === null
+                ? "Ajouter un traitement"
+                : "Modifier le traitement"}
+            </h2>
+            <span className="card-caption">
+              {editingId === null
+                ? "Renseignez le protocole et dosage"
+                : "Ajustez les informations du traitement"}
+            </span>
+          </div>
 
-          <div className="traitements-form">
+          <form className="traitements-form" onSubmit={handleSubmit}>
             <div className="form-groupe">
               <label htmlFor="nom">Nom du traitement</label>
               <input
                 id="nom"
                 type="text"
+                placeholder="Ex: Traitement antifongique..."
                 value={nom}
                 onChange={(e) => setNom(e.target.value)}
               />
@@ -190,42 +230,51 @@ function Traitements() {
               <input
                 id="description"
                 type="text"
+                placeholder="Ex: Contre les maladies foliaires..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
 
             <div className="form-groupe">
-              <label htmlFor="produit">Produit</label>
+              <label htmlFor="produit">Produit phytosanitaire</label>
               <input
                 id="produit"
                 type="text"
+                placeholder="Ex: Bouillie bordelaise..."
                 value={produit}
                 onChange={(e) => setProduit(e.target.value)}
               />
             </div>
 
             <div className="form-groupe">
-              <label htmlFor="dosage">Dosage</label>
+              <label htmlFor="dosage">Dosage recommandé</label>
               <input
                 id="dosage"
                 type="text"
+                placeholder="Ex: 2 g/L, 100 ml/ha..."
                 value={dosage}
                 onChange={(e) => setDosage(e.target.value)}
               />
             </div>
-          </div>
 
-          <button type="submit">
-            {editingId === null ? "Ajouter un traitement" : "Modifier le traitement"}
-          </button>
+            <div className="form-actions">
+              <button type="submit" className="btn-submit">
+                {editingId === null ? "Ajouter" : "Enregistrer"}
+              </button>
 
-          {editingId !== null && (
-            <button type="button" onClick={handleCancelEdit}>
-              Annuler
-            </button>
-          )}
-        </form>
+              {editingId !== null && (
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={handleCancelEdit}
+                >
+                  Annuler
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
