@@ -12,6 +12,7 @@ import Historiques from './pages/Historiques'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import MainLayout from './layouts/MainLayout'
+import Alertes from './pages/Alertes'
  
 function App() {
   const [applications, setApplications] = useState([]);
@@ -25,6 +26,7 @@ function App() {
           <Route path='/traitements' element={<Traitements />} />
           <Route path='/applications' element={<Applications applications={applications} setApplications={setApplications}/>}/>
           <Route path='/historiques' element={<Historiques applications={applications}/>}/>
+          <Route path='/alertes' element={<Alertes/>}/>
         </Route>
       </Routes>
    </BrowserRouter>
