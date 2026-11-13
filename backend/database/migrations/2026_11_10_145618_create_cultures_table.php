@@ -10,14 +10,15 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('cultures', function (Blueprint $table) {
-    $table->id();
-    $table->string('nom');
-    $table->text('description')->nullable();
-    $table->timestamps();
-});
-    }
+{
+    Schema::create('cultures', function (Blueprint $table) {
+        $table->id();
+        $table->string('nom');
+        $table->string('type');
+        $table->decimal('superficie', 10, 2);
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
