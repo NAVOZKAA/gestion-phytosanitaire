@@ -1,22 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Cultures.css";
-
+import api from "../services/api";
 function Cultures() {
   const [editingId, setEditingId] = useState(null);
-  const [cultures, setCultures] = useState([
-    {
-      id: 1,
-      nom: "Tomate",
-      type: "Légume",
-      superficie: 2
-    },
-    {
-      id: 2,
-      nom: "Olivier",
-      type: "Arbre fruitier",
-      superficie: 5
+  const [cultures, setCultures] = useState([]);
+  const [nom, setNom] = useState("");
+  const [type, setType] = useState("");
+  const [superficie, setSuperficie] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCultures() {
+      try {
+        const response = await api.get("/cultures");
+        if (!cancelled) {
+          setCultures(response.data);
+          setError("");
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError("Impossible de charger les cultures.");
+          console.error(err);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     }
-  ]);
+
+    loadCultures();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -29,7 +52,6 @@ function Cultures() {
       return;
     }
     if (editingId === null) {
-      //   add  culture
       const nouvelleCulture = {
         id: Date.now(),
         nom: nom,
@@ -39,7 +61,6 @@ function Cultures() {
 
       setCultures([...cultures, nouvelleCulture]);
     } else {
-      //  modify   culture
       const updatedCultures = cultures.map((culture) => {
         if (culture.id === editingId) {
           return {
@@ -62,12 +83,7 @@ function Cultures() {
     setSuperficie("");
   }
 
-  // formulaire
-  const [nom, setNom] = useState("");
-  const [type, setType] = useState("");
-  const [superficie, setSuperficie] = useState("");
 
-  // supprimer culture
   function handledelete(id) {
     setCultures(cultures.filter((culture) => culture.id !== id));
 
@@ -92,7 +108,9 @@ function Cultures() {
     setType("");
     setSuperficie("");
   }
-
+  if (loading) {
+    return <p>Chargement des cultures...</p>;
+  }
   return (
     <div className="cultures-page">
       <div className="cultures-header">
@@ -103,6 +121,7 @@ function Cultures() {
       </div>
 
       <div className="cultures-content">
+        {error && <p role="alert">{error}</p>}
         <div className="cultures-table-card">
           <div className="card-header">
             <h2>Liste des cultures</h2>
