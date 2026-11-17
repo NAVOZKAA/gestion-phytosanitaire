@@ -1,11 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\CultureController;
 use App\Http\Controllers\Api\MaladieController;
 use App\Http\Controllers\Api\TraitementController;
 use App\Http\Controllers\Api\ApplicationTraitementController;
 use App\Http\Controllers\Api\AlerteController;
+
+Route::get('/dashboard', [DashboardController::class, 'index']);
 
 // Cultures
 Route::apiResource('cultures', CultureController::class);
