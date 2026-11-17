@@ -13,23 +13,32 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import MainLayout from './layouts/MainLayout'
 import Alertes from './pages/Alertes'
- 
+import Login from './pages/Login'
+import ProtectedRoute from "./components/ProtectedRoute";
+
 function App() {
   const [applications, setApplications] = useState([]);
   return (
-   <BrowserRouter>
+    <BrowserRouter>
       <Routes>
-        <Route element={<MainLayout />}>
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/"
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }>
           <Route path='/' index element={<Dashboard />} />
           <Route path='/cultures' element={<Cultures />} />
           <Route path='/maladies' element={<Maladies />} />
           <Route path='/traitements' element={<Traitements />} />
-          <Route path='/applications' element={<Applications applications={applications} setApplications={setApplications}/>}/>
-          <Route path='/historiques' element={<Historiques applications={applications}/>}/>
-          <Route path='/alertes' element={<Alertes/>}/>
+          <Route path='/applications' element={<Applications applications={applications} setApplications={setApplications} />} />
+          <Route path='/historiques' element={<Historiques applications={applications} />} />
+          <Route path='/alertes' element={<Alertes />} />
         </Route>
       </Routes>
-   </BrowserRouter>
+    </BrowserRouter>
   )
 }
 

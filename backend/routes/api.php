@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\MaladieController;
 use App\Http\Controllers\Api\TraitementController;
 use App\Http\Controllers\Api\ApplicationTraitementController;
 use App\Http\Controllers\Api\AlerteController;
-
+use App\Http\Controllers\AuthController;
 Route::get('/dashboard', [DashboardController::class, 'index']);
 
 // Cultures
@@ -26,3 +26,13 @@ Route::apiResource('alertes', AlerteController::class);
 
 // Mark alert as read
 Route::patch('/alertes/{id}/read', [AlerteController::class, 'markAsRead']);
+
+
+// Public route
+Route::post('/login', [AuthController::class, 'login']);
+
+// Protected routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'me']);
+});
