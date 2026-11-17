@@ -1,19 +1,31 @@
-function Historique({ applications }) {
+import { useState, useEffect } from "react";
+import api from "../services/api";
 
-    const cultures = [
-        { id: 1, nom: "Tomate" },
-        { id: 2, nom: "Olivier" }
-    ];
+function Historique() {
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-    const maladies = [
-        { id: 1, nom: "Mildiou" },
-        { id: 2, nom: "Oïdium" }
-    ];
+    const fetchApplications = async () => {
+        try {
+            const response = await api.get("/applications");
+            setApplications(response.data);
+            setError("");
+        } catch (err) {
+            setError("Impossible de charger l'historique.");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const traitements = [
-        { id: 1, nom: "Traitement antifongique" },
-        { id: 2, nom: "Traitement insecticide" }
-    ];
+    useEffect(() => {
+        fetchApplications();
+    }, []);
+
+    if (loading) {
+        return <p>Chargement de l'historique...</p>;
+    }
 
     return (
         <div>
@@ -35,13 +47,13 @@ function Historique({ applications }) {
                 <tbody>
                     {applications.map((application) => (
                         <tr key={application.id}>
-                            <td>{cultures.find(c => c.id === Number(application.cultureId))?.nom}</td>
-                            <td>{maladies.find(m => m.id === Number(application.maladieId))?.nom}</td>
-                            <td>{traitements.find(t => t.id === Number(application.traitementId))?.nom}</td>
-                            <td>{application.dateApplication}</td>
-                            <td>{application.dateSuivi}</td>
+                            <td>{application.culture?.nom || "Culture #" + application.culture_id}</td>
+                            <td>{application.maladie?.nom || "Maladie #" + application.maladie_id}</td>
+                            <td>{application.traitement?.nom || "Traitement #" + application.traitement_id}</td>
+                            <td>{application.date_application || application.dateApplication}</td>
+                            <td>{application.date_suivi || application.dateSuivi || "-"}</td>
                             <td>{application.observations || "-"}</td>
-                            <td>{application.resultat}</td>
+                            <td>{application.resultat || "À évaluer"}</td>
                         </tr>
                     ))}
 

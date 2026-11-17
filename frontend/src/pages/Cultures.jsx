@@ -11,37 +11,25 @@ function Cultures() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadCultures() {
-      try {
-        const response = await api.get("/cultures");
-        if (!cancelled) {
-          setCultures(response.data);
-          setError("");
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError("Impossible de charger les cultures.");
-          console.error(err);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+  const fetchCultures = async () => {
+    try {
+      const response = await api.get("/cultures");
+      setCultures(response.data);
+      setError("");
+    } catch (err) {
+      setError("Impossible de charger les cultures.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    loadCultures();
-
-    return () => {
-      cancelled = true;
-    };
+  useEffect(() => {
+    fetchCultures();
   }, []);
 
 
-  function handleSubmit(e) {
+const handleSubmit = async (e) => {
     e.preventDefault();
     if (nom === "" || type === "" || superficie === "") {
       alert(" veuillez remplir tous les champs");
@@ -51,44 +39,43 @@ function Cultures() {
       alert("La superficie doit être supérieure à zéro");
       return;
     }
-    if (editingId === null) {
-      const nouvelleCulture = {
-        id: Date.now(),
-        nom: nom,
-        type: type,
+
+    try {
+      const data = {
+        nom,
+        type,
         superficie: Number(superficie)
       };
 
-      setCultures([...cultures, nouvelleCulture]);
-    } else {
-      const updatedCultures = cultures.map((culture) => {
-        if (culture.id === editingId) {
-          return {
-            ...culture,
-            nom: nom,
-            type: type,
-            superficie: Number(superficie)
-          };
-        }
+      if (editingId === null) {
+        await api.post("/cultures", data);
+      } else {
+        await api.put(`/cultures/${editingId}`, data);
+      }
 
-        return culture;
-      });
+      setNom("");
+      setType("");
+      setSuperficie("");
+      setEditingId(null);
 
-      setCultures(updatedCultures);
+      await fetchCultures();
+
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l'enregistrement.");
     }
-
-    setEditingId(null);
-    setNom("");
-    setType("");
-    setSuperficie("");
-  }
+  };
 
 
-  function handledelete(id) {
-    setCultures(cultures.filter((culture) => culture.id !== id));
-
-    if (editingId === id) {
-      handleCancelEdit();
+  const  handledelete=async (id) =>{
+    if (window.confirm("Voulez-vous vraiment supprimer cette maladie ?")) {
+    try{
+      api.delete(`/cultures/${id}`);
+      await fetchCultures();
+    }catch (err) {
+            console.error(err);
+            alert("Erreur lors de la suppression.");
+        }
     }
   }
 
@@ -111,6 +98,13 @@ function Cultures() {
   if (loading) {
     return <p>Chargement des cultures...</p>;
   }
+  if (loading) {
+    return <p>Chargement des maladies...</p>;
+}
+
+if (error) {
+    return <p>{error}</p>;
+}
   return (
     <div className="cultures-page">
       <div className="cultures-header">

@@ -1,23 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Traitements.css";
+import api from "../services/api";
 
 function Traitements() {
-  const [traitements, setTraitements] = useState([
-    {
-      id: 1,
-      nom: "Traitement antifongique",
-      description: "Contre les maladies fongiques",
-      produit: "Produit antifongique",
-      dosage: "2 g/L"
-    },
-    {
-      id: 2,
-      nom: "Traitement insecticide",
-      description: "Contre les insectes nuisibles",
-      produit: "Produit insecticide",
-      dosage: "1 ml/L"
-    }
-  ]);
+  const [traitements, setTraitements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [nom, setNom] = useState("");
   const [description, setDescription] = useState("");
@@ -27,7 +15,24 @@ function Traitements() {
   const [searchTerm, setSearchTerm] = useState("");
   const [submittedSearch, setSubmittedSearch] = useState("");
 
-  function handleSubmit(e) {
+  const fetchTraitements = async () => {
+    try {
+      const response = await api.get("/traitements");
+      setTraitements(response.data);
+      setError("");
+    } catch (err) {
+      setError("Impossible de charger les traitements.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTraitements();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!nom.trim() || !description.trim() || !produit.trim() || !dosage.trim()) {
@@ -35,35 +40,27 @@ function Traitements() {
       return;
     }
 
-    if (editingId === null) {
-      const newTraitement = {
-        id: Date.now(),
-        nom,
-        description,
-        produit,
-        dosage
-      };
+    const data = {
+      nom,
+      description,
+      produit,
+      dosage
+    };
 
-      setTraitements([...traitements, newTraitement]);
-    } else {
-      const updatedTraitements = traitements.map((traitement) => {
-        if (traitement.id === editingId) {
-          return {
-            ...traitement,
-            nom,
-            description,
-            produit,
-            dosage
-          };
-        }
-        return traitement;
-      });
+    try {
+      if (editingId === null) {
+        await api.post("/traitements", data);
+      } else {
+        await api.put(`/traitements/${editingId}`, data);
+      }
 
-      setTraitements(updatedTraitements);
+      handleCancelEdit();
+      await fetchTraitements();
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l'enregistrement du traitement.");
     }
-
-    handleCancelEdit();
-  }
+  };
 
   function handleEdit(id) {
     const traitement = traitements.find((traitement) => traitement.id === id);
@@ -83,13 +80,17 @@ function Traitements() {
     setDosage("");
   }
 
-  function handleDelete(id) {
-    setTraitements(traitements.filter((traitement) => traitement.id !== id));
-
-    if (editingId === id) {
-      handleCancelEdit();
+  const handleDelete = async (id) => {
+    if (window.confirm("Voulez-vous vraiment supprimer ce traitement ?")) {
+      try {
+        await api.delete(`/traitements/${id}`);
+        await fetchTraitements();
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de la suppression.");
+      }
     }
-  }
+  };
 
   function handleSearch() {
     setSubmittedSearch(searchTerm.trim());
@@ -98,6 +99,10 @@ function Traitements() {
   const filteredTraitements = traitements.filter((traitement) =>
     traitement.nom.toLowerCase().includes(submittedSearch.toLowerCase())
   );
+
+  if (loading) {
+    return <p>Chargement des traitements...</p>;
+  }
 
   return (
     <div className="traitements-page">

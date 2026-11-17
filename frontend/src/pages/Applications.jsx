@@ -1,23 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Applications.css";
+import api from "../services/api";
 
-function Applications({applications,setApplications}) {
-  const cultures = [
-    { id: 1, nom: "Tomate" },
-    { id: 2, nom: "Olivier" }
-  ];
+function Applications() {
+  const [applications, setApplications] = useState([]);
+  const [cultures, setCultures] = useState([]);
+  const [maladies, setMaladies] = useState([]);
+  const [traitements, setTraitements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const maladies = [
-    { id: 1, nom: "Mildiou" },
-    { id: 2, nom: "Oïdium" }
-  ];
-
-  const traitements = [
-    { id: 1, nom: "Traitement antifongique" },
-    { id: 2, nom: "Traitement insecticide" }
-  ];
-
-//   const [applications, setApplications] = useState([]);
   const [cultureId, setCultureId] = useState("");
   const [maladieId, setMaladieId] = useState("");
   const [traitementId, setTraitementId] = useState("");
@@ -26,7 +18,32 @@ function Applications({applications,setApplications}) {
   const [observations, setObservations] = useState("");
   const [editingId, setEditingId] = useState(null);
 
-  function handleSubmit(e) {
+  const fetchData = async () => {
+    try {
+      const [resApps, resCultures, resMaladies, resTraitements] = await Promise.all([
+        api.get("/applications"),
+        api.get("/cultures"),
+        api.get("/maladies"),
+        api.get("/traitements")
+      ]);
+      setApplications(resApps.data);
+      setCultures(resCultures.data);
+      setMaladies(resMaladies.data);
+      setTraitements(resTraitements.data);
+      setError("");
+    } catch (err) {
+      setError("Impossible de charger les données.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (
       !cultureId ||
@@ -44,68 +61,40 @@ function Applications({applications,setApplications}) {
       return;
     }
 
-    if (editingId === null) {
-      const nouvelleApplication = {
-        id: Date.now(),
-        cultureId,
-        maladieId,
-        traitementId,
-        dateApplication,
-        dateSuivi,
-        observations,
-        resultat: "À évaluer"
-      };
+    const data = {
+      culture_id: Number(cultureId),
+      maladie_id: Number(maladieId),
+      traitement_id: Number(traitementId),
+      date_application: dateApplication,
+      date_suivi: dateSuivi,
+      observations: observations,
+      resultat: "À évaluer",
+      utilisateur_id: 1
+    };
 
-      setApplications([...applications, nouvelleApplication]);
+    try {
+      if (editingId === null) {
+        await api.post("/applications", data);
+      } else {
+        await api.put(`/applications/${editingId}`, data);
+      }
 
-      setCultureId("");
-      setMaladieId("");
-      setTraitementId("");
-      setDateApplication("");
-      setDateSuivi("");
-      setObservations("");
+      handleCancelEdit();
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l'enregistrement de l'application.");
     }
-
-    if (editingId === null) {
-      const nouvelleApplication = {
-        id: Date.now(),
-        cultureId,
-        maladieId,
-        traitementId,
-        dateApplication,
-        dateSuivi,
-        observations,
-        resultat: "À évaluer"
-      };
-
-      setApplications([...applications, nouvelleApplication]);
-    } else {
-      const applicationsModifiees = applications.map((application) =>
-        application.id === editingId
-          ? {
-              ...application,
-              cultureId,
-              maladieId,
-              traitementId,
-              dateApplication,
-              dateSuivi,
-              observations
-            }
-          : application
-      );
-
-      setApplications(applicationsModifiees);
-    }
-  }
+  };
 
   function handleEdit(application) {
     setEditingId(application.id);
-    setCultureId(String(application.cultureId));
-    setMaladieId(String(application.maladieId));
-    setTraitementId(String(application.traitementId));
-    setDateApplication(application.dateApplication);
-    setDateSuivi(application.dateSuivi);
-    setObservations(application.observations);
+    setCultureId(String(application.culture_id || application.cultureId));
+    setMaladieId(String(application.maladie_id || application.maladieId));
+    setTraitementId(String(application.traitement_id || application.traitementId));
+    setDateApplication(application.date_application || application.dateApplication || "");
+    setDateSuivi(application.date_suivi || application.dateSuivi || "");
+    setObservations(application.observations || "");
   }
 
   function handleCancelEdit() {
@@ -118,12 +107,20 @@ function Applications({applications,setApplications}) {
     setObservations("");
   }
 
-  function handleDelete(id) {
+  const handleDelete = async (id) => {
     if (window.confirm("Voulez-vous vraiment supprimer cette application ?")) {
-      setApplications(
-        applications.filter((application) => application.id !== id)
-      );
+      try {
+        await api.delete(`/applications/${id}`);
+        await fetchData();
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de la suppression.");
+      }
     }
+  };
+
+  if (loading) {
+    return <p>Chargement des applications...</p>;
   }
 
   return (
@@ -265,24 +262,24 @@ function Applications({applications,setApplications}) {
                   >
                     <td>
                       <span className="badge-culture">
-                        {cultures.find((c) => c.id === Number(application.cultureId))?.nom}
+                        {application.culture?.nom || cultures.find((c) => c.id === Number(application.culture_id || application.cultureId))?.nom || "Culture #" + (application.culture_id || application.cultureId)}
                       </span>
                     </td>
                     <td>
                       <span className="badge-maladie">
-                        {maladies.find((m) => m.id === Number(application.maladieId))?.nom}
+                        {application.maladie?.nom || maladies.find((m) => m.id === Number(application.maladie_id || application.maladieId))?.nom || "Maladie #" + (application.maladie_id || application.maladieId)}
                       </span>
                     </td>
                     <td>
                       <span className="badge-traitement">
-                        {traitements.find((t) => t.id === Number(application.traitementId))?.nom}
+                        {application.traitement?.nom || traitements.find((t) => t.id === Number(application.traitement_id || application.traitementId))?.nom || "Traitement #" + (application.traitement_id || application.traitementId)}
                       </span>
                     </td>
-                    <td className="cell-date">{application.dateApplication}</td>
-                    <td className="cell-date">{application.dateSuivi}</td>
+                    <td className="cell-date">{application.date_application || application.dateApplication}</td>
+                    <td className="cell-date">{application.date_suivi || application.dateSuivi || "-"}</td>
                     <td className="cell-obs">{application.observations || "-"}</td>
                     <td>
-                      <span className="badge-resultat">{application.resultat}</span>
+                      <span className="badge-resultat">{application.resultat || "À évaluer"}</span>
                     </td>
                     <td className="cell-actions">
                       <button

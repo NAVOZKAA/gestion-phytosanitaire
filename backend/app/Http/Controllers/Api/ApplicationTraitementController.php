@@ -28,12 +28,16 @@ class ApplicationTraitementController extends Controller
             'culture_id' => 'required|exists:cultures,id',
             'maladie_id' => 'required|exists:maladies,id',
             'traitement_id' => 'required|exists:traitements,id',
-            'utilisateur_id' => 'required|exists:users,id',
+            'utilisateur_id' => 'nullable|exists:users,id',
             'date_application' => 'required|date',
             'date_suivi' => 'nullable|date|after_or_equal:date_application',
             'observations' => 'nullable|string',
             'resultat' => 'nullable|string|max:255',
         ]);
+
+        if (empty($validated['utilisateur_id'])) {
+            $validated['utilisateur_id'] = 1;
+        }
 
         $application = ApplicationTraitement::create($validated);
 
@@ -63,12 +67,16 @@ class ApplicationTraitementController extends Controller
             'culture_id' => 'required|exists:cultures,id',
             'maladie_id' => 'required|exists:maladies,id',
             'traitement_id' => 'required|exists:traitements,id',
-            'utilisateur_id' => 'required|exists:users,id',
+            'utilisateur_id' => 'nullable|exists:users,id',
             'date_application' => 'required|date',
             'date_suivi' => 'nullable|date|after_or_equal:date_application',
             'observations' => 'nullable|string',
             'resultat' => 'nullable|string|max:255',
         ]);
+
+        if (empty($validated['utilisateur_id'])) {
+            $validated['utilisateur_id'] = $application->utilisateur_id ?? 1;
+        }
 
         $application->update($validated);
 

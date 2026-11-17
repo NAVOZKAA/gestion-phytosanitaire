@@ -1,14 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../services/api";
 
 function Alertes() {
-
     const [alertes, setAlertes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const [titre, setTitre] = useState("");
     const [message, setMessage] = useState("");
     const [type, setType] = useState("Manuelle");
     const [dateAlerte, setDateAlerte] = useState("");
-    function handleSubmit(e) {
+
+    const fetchAlertes = async () => {
+        try {
+            const response = await api.get("/alertes");
+            setAlertes(response.data);
+            setError("");
+        } catch (err) {
+            setError("Impossible de charger les alertes.");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAlertes();
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!titre.trim() || !message.trim() || !dateAlerte) {
@@ -16,45 +36,62 @@ function Alertes() {
             return;
         }
 
-        const nouvelleAlerte = {
-            id: Date.now(),
+        const data = {
             titre,
             message,
             type,
-            dateAlerte,
-            lue: false
+            date_alerte: dateAlerte
         };
 
-        setAlertes([...alertes, nouvelleAlerte]);
+        try {
+            await api.post("/alertes", data);
 
-        setTitre("");
-        setMessage("");
-        setType("Manuelle");
-        setDateAlerte("");
-    }
-    function handleMarkAsRead(id) {
-    setAlertes(
-        alertes.map((alerte) =>
-            alerte.id === id
-                ? { ...alerte, lue: true }
-                : alerte
-        )
-    );
-}
+            setTitre("");
+            setMessage("");
+            setType("Manuelle");
+            setDateAlerte("");
 
-function handleDelete(id) {
-    if (window.confirm("Supprimer cette alerte ?")) {
-        setAlertes(alertes.filter((alerte) => alerte.id !== id));
+            await fetchAlertes();
+        } catch (err) {
+            console.error(err);
+            alert("Erreur lors de l'enregistrement de l'alerte.");
+        }
+    };
+
+    const handleMarkAsRead = async (id) => {
+        try {
+            await api.patch(`/alertes/${id}/read`);
+            await fetchAlertes();
+        } catch (err) {
+            console.error(err);
+            alert("Erreur lors de la mise à jour de l'alerte.");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Supprimer cette alerte ?")) {
+            try {
+                await api.delete(`/alertes/${id}`);
+                await fetchAlertes();
+            } catch (err) {
+                console.error(err);
+                alert("Erreur lors de la suppression.");
+            }
+        }
+    };
+
+    if (loading) {
+        return <p>Chargement des alertes...</p>;
     }
-}
+
     return (
         <div>
             <h1>Gestion des alertes</h1>
             <form onSubmit={handleSubmit}>
                 <label htmlFor="titre">Titre</label>
                 <input
+                    id="titre"
                     type="text"
-
                     value={titre}
                     onChange={(e) => setTitre(e.target.value)}
                 />
@@ -85,51 +122,53 @@ function handleDelete(id) {
             </form>
             <h2>Liste des alertes</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>Titre</th>
-            <th>Message</th>
-            <th>Type</th>
-            <th>Date</th>
-            <th>Statut</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Message</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-    <tbody>
-        {alertes.map((alerte) => (
-            <tr key={alerte.id}>
-                <td>{alerte.titre}</td>
-                <td>{alerte.message}</td>
-                <td>{alerte.type}</td>
-                <td>{alerte.dateAlerte}</td>
-                <td>{alerte.lue ? "Lue" : "Non lue"}</td>
-                <td>
-                    {!alerte.lue && (
-                        <button
-                            onClick={() => handleMarkAsRead(alerte.id)}
-                        >
-                            Marquer comme lue
-                        </button>
+                <tbody>
+                    {alertes.map((alerte) => (
+                        <tr key={alerte.id}>
+                            <td>{alerte.titre}</td>
+                            <td>{alerte.message}</td>
+                            <td>{alerte.type}</td>
+                            <td>{alerte.date_alerte || alerte.dateAlerte}</td>
+                            <td>{alerte.lue ? "Lue" : "Non lue"}</td>
+                            <td>
+                                {!alerte.lue && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleMarkAsRead(alerte.id)}
+                                    >
+                                        Marquer comme lue
+                                    </button>
+                                )}
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(alerte.id)}
+                                >
+                                    Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+
+                    {alertes.length === 0 && (
+                        <tr>
+                            <td colSpan="6">Aucune alerte disponible.</td>
+                        </tr>
                     )}
-
-                    <button
-                        onClick={() => handleDelete(alerte.id)}
-                    >
-                        Supprimer
-                    </button>
-                </td>
-            </tr>
-        ))}
-
-        {alertes.length === 0 && (
-            <tr>
-                <td colSpan="6">Aucune alerte disponible.</td>
-            </tr>
-        )}
-    </tbody>
-</table>
+                </tbody>
+            </table>
         </div>
     );
 }

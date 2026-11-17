@@ -1,21 +1,10 @@
-import { useState } from "react";
-import "./Maladies.css";
-
+ import "./Maladies.css";
+import { useState, useEffect } from "react";
+import api from "../services/api";
 function Maladies() {
-  const [maladies, setMaladies] = useState([
-    {
-      id: 1,
-      nom: "Mildiou",
-      description: "Maladie causée par un champignon",
-      symptomes: "Taches brunes sur les feuilles"
-    },
-    {
-      id: 2,
-      nom: "Oïdium",
-      description: "Maladie causée par un champignon parasite",
-      symptomes: "Poudre blanche sur les feuilles"
-    }
-  ]);
+  const [maladies, setMaladies] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
 
   const [nom, setNom] = useState("");
   const [description, setDescription] = useState("");
@@ -24,7 +13,24 @@ function Maladies() {
   const [searchTerm, setSearchTerm] = useState("");
   const [submittedSearch, setSubmittedSearch] = useState("");
 
-  function handleSubmit(e) {
+  const fetchMaladies = async () => {
+    try {
+      const response = await api.get("/maladies");
+      setMaladies(response.data);
+      setError("");
+    } catch (err) {
+      setError("Impossible de charger les maladies.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMaladies();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!nom.trim() || !description.trim() || !symptomes.trim()) {
@@ -32,34 +38,31 @@ function Maladies() {
       return;
     }
 
-    if (editingId === null) {
-      const newMaladie = {
-        id: Date.now(),
-        nom: nom,
-        description: description,
-        symptomes: symptomes
-      };
-      setMaladies([...maladies, newMaladie]);
-    } else {
-      const updatemaladie = maladies.map((maladie) => {
-        if (maladie.id === editingId) {
-          return {
-            ...maladie,
-            nom: nom,
-            description: description,
-            symptomes: symptomes
-          };
-        }
-        return maladie;
-      });
-      setMaladies(updatemaladie);
-    }
+    
+    const data = {
+        nom,
+        description,
+        symptomes
+    };
 
-    setEditingId(null);
-    setNom("");
-    setDescription("");
-    setSymptomes("");
-  }
+    try {
+        if (editingId === null) {
+            await api.post("/maladies", data);
+        } else {
+            await api.put(`/maladies/${editingId}`, data);
+        }
+
+        setNom("");
+        setDescription("");
+        setSymptomes("");
+        setEditingId(null);
+
+        await fetchMaladies();
+    } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'enregistrement de la maladie.");
+    }
+};
 
   function handleEdit(id) {
     const maladie = maladies.find((maladie) => maladie.id === id);
@@ -76,12 +79,17 @@ function Maladies() {
     setSymptomes("");
   }
 
-  function handleDelete(id) {
-    setMaladies(maladies.filter((maladie) => maladie.id !== id));
-    if (editingId === id) {
-      handleCancelEdit();
+  const handleDelete = async (id) => {
+    if (window.confirm("Voulez-vous vraiment supprimer cette maladie ?")) {
+        try {
+            await api.delete(`/maladies/${id}`);
+            await fetchMaladies();
+        } catch (err) {
+            console.error(err);
+            alert("Erreur lors de la suppression.");
+        }
     }
-  }
+};
 
   const filtredMaladie = maladies.filter((maladie) =>
     maladie.nom.toLowerCase().includes(submittedSearch.toLowerCase())
